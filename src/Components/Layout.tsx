@@ -1,9 +1,8 @@
-import { type FC } from "react";
 
 type LayoutProps = {
     children: React.ReactNode,
 };
-const Layout: FC = ({ children }: LayoutProps) => {
+const Layout = ({ children }: LayoutProps): React.ReactNode => {
     return (
         <div className="font-mono flex flex-col min-w-full min-h-screen bg-gray-900">
 
