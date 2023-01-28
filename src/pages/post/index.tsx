@@ -4,6 +4,8 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { type FC, useState } from "react";
 import { api } from "../../utils/api";
 import dynamic from "next/dynamic";
+import { Post, Tag } from "@prisma/client";
+import { z } from "zod";
 
 
 
@@ -55,25 +57,19 @@ const formats = [
   'video',
 ]
 
+type tags = {
+  id: string | undefined,
+  desc:string
+}
 const Form: FC = () => {
 
   const [content, setContent] = useState("");
   const [tag, setTag] = useState("");
-  const [tags, setTags] = useState([]);
+  const [tags, setTags] = useState<tags[]>([]);
   const { data: session, status } = useSession();
 
   const utils = api.useContext();
   const postMessage = api.post.postMessage.useMutation({
-    onMutate: async (newEntry) => {
-      await utils.post.getAll.cancel();
-      utils.post.getAll.setData(undefined, (prevEntries) => {
-        if (prevEntries) {
-          return [newEntry, ...prevEntries];
-        } else {
-          return [newEntry];
-        }
-      });
-    },
     onSettled: async () => {
       await utils.post.getAll.invalidate();
     },
@@ -87,7 +83,6 @@ const Form: FC = () => {
         postMessage.mutate({
           tag: tags,
           content,
-
         });
         setTags([]);
         setContent("");
@@ -109,7 +104,7 @@ const Form: FC = () => {
 
 
         <div className="flex flex-col">
-          {tags?.map((entry, index) => (
+          {tags?.map((entry: tags, index) => (
             <div key={index}>
               <p>{entry.desc}</p>
             </div>
@@ -125,15 +120,15 @@ const Form: FC = () => {
               value={tag}
               onChange={(event) => setTag(event.target.value)}
             />
-          <div className="flex flex-row">
-            <div
-              className="rounded-md border-2 border-zinc-800 p-2 focus:outline-none"
-              onClick={(e) => { e.preventDefault(); setTags([...tags, { desc: tag }]); setTag(""); }}
-            >
+            <div className="flex flex-row">
+              <div
+                className="rounded-md border-2 border-zinc-800 p-2 focus:outline-none"
+                onClick={(e) => { e.preventDefault(); setTags([...tags, {id:undefined, desc: tag }]); setTag(""); }}
+              >
 
-              ADD
+                ADD
+              </div>
             </div>
-          </div>
           </div>
 
         </div>
