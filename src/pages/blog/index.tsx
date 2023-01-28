@@ -1,3 +1,5 @@
+import { type NextPage } from "next";
+
 const Blog: NextPage = () => {
     return (
         <div className="flex lg:flex-row flex-col w-full px-10 lg:p-0">
