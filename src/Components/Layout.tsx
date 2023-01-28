@@ -1,8 +1,8 @@
 
-type LayoutProps = {
+type Props = {
     children: React.ReactNode,
 };
-const Layout = ({ children }: LayoutProps): React.ReactNode => {
+const Layout: React.FC<Props> = ({ children }): JSX.Element => {
     return (
         <div className="font-mono flex flex-col min-w-full min-h-screen bg-gray-900">
 
