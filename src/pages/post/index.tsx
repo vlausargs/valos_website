@@ -4,65 +4,59 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { type FC, useState } from "react";
 import { api } from "../../utils/api";
 import dynamic from "next/dynamic";
-import { Post, Tag } from "@prisma/client";
-import { z } from "zod";
 
-
-
-
-const QuillNoSSRWrapper = dynamic(() => import('react-quill'), {
+const QuillNoSSRWrapper = dynamic(() => import("react-quill"), {
   ssr: false,
   loading: () => <p>Loading ...</p>,
-})
+});
 
 const modules = {
-
   toolbar: [
-    [{ header: '1' }, { header: '2' }, { font: [] }],
+    [{ header: "1" }, { header: "2" }, { font: [] }],
     [{ size: [] }],
-    ['bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block'],
+    ["bold", "italic", "underline", "strike", "blockquote", "code-block"],
     [
-      { list: 'ordered' },
-      { list: 'bullet' },
-      { indent: '-1' },
-      { indent: '+1' },
+      { list: "ordered" },
+      { list: "bullet" },
+      { indent: "-1" },
+      { indent: "+1" },
     ],
-    ['link', 'image', 'video'],
-    ['clean'],
+    ["link", "image", "video"],
+    ["clean"],
   ],
   clipboard: {
     // toggle to add extra line breaks when pasting HTML:
     matchVisual: false,
   },
-}
+};
 /*
  * Quill editor formats
  * See https://quilljs.com/docs/formats/
  */
 const formats = [
-  'header',
-  'font',
-  'size',
-  'bold',
-  'italic',
-  'underline',
-  'strike',
-  'blockquote',
-  'code-block',
-  'list',
-  'bullet',
-  'indent',
-  'link',
-  'image',
-  'video',
-]
+  "header",
+  "font",
+  "size",
+  "bold",
+  "italic",
+  "underline",
+  "strike",
+  "blockquote",
+  "code-block",
+  "list",
+  "bullet",
+  "indent",
+  "link",
+  "image",
+  "video",
+];
 
 type tags = {
-  id: string | undefined,
-  desc:string
-}
-const Form: FC = () => {
-
+  id: string | undefined;
+  desc: string;
+};
+const FormPost: FC = () => {
+  const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [tag, setTag] = useState("");
   const [tags, setTags] = useState<tags[]>([]);
@@ -77,19 +71,32 @@ const Form: FC = () => {
 
   return status === "authenticated" ? (
     <form
-      className="flex gap-2"
+      className="m-auto w-9/12"
       onSubmit={(event) => {
         event.preventDefault();
         postMessage.mutate({
+          title,
           tag: tags,
           content,
         });
+        setTitle("");
         setTags([]);
         setContent("");
       }}
     >
       <div className="flex flex-col">
-        <div className="flex flex-col mb-20">
+        <div className="flex flex-col">
+          <input
+            type="text"
+            className="rounded-md border-2 border-zinc-800 px-4 py-2 focus:outline-none"
+            placeholder="title"
+            minLength={2}
+            maxLength={100}
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+          />
+        </div>
+        <div className="mb-20 flex w-full flex-col">
           {/* <input
             type="text"
             className="rounded-md border-2 border-zinc-800 px-4 py-2 focus:outline-none"
@@ -99,10 +106,13 @@ const Form: FC = () => {
             value={content}
             onChange={(event) => setContent(event.target.value)}
           /> */}
-          <QuillNoSSRWrapper modules={modules} formats={formats} onChange={setContent} theme="snow" />
+          <QuillNoSSRWrapper
+            modules={modules}
+            formats={formats}
+            onChange={setContent}
+            theme="snow"
+          />
         </div>
-
-
         <div className="flex flex-col">
           {tags?.map((entry: tags, index) => (
             <div key={index}>
@@ -110,7 +120,6 @@ const Form: FC = () => {
             </div>
           ))}
           <div className="flex flex-row">
-
             <input
               type="text"
               className="rounded-md border-2 border-zinc-800 px-4 py-2 focus:outline-none"
@@ -123,14 +132,16 @@ const Form: FC = () => {
             <div className="flex flex-row">
               <div
                 className="rounded-md border-2 border-zinc-800 p-2 focus:outline-none"
-                onClick={(e) => { e.preventDefault(); setTags([...tags, {id:undefined, desc: tag }]); setTag(""); }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setTags([...tags, { id: undefined, desc: tag }]);
+                  setTag("");
+                }}
               >
-
                 ADD
               </div>
             </div>
           </div>
-
         </div>
         <button
           type="submit"
@@ -139,32 +150,28 @@ const Form: FC = () => {
           Submit
         </button>
       </div>
-
-
-
-
     </form>
   ) : null;
 };
 
-const PostEntries: FC = () => {
-  const { data: postEntries, isLoading } = api.post.getAll.useQuery();
+// const PostEntries: FC = () => {
+//   const { data: postEntries, isLoading } = api.post.getAll.useQuery();
 
-  if (isLoading) {
-    return <div>Fetching messages...</div>;
-  }
+//   if (isLoading) {
+//     return <div>Fetching messages...</div>;
+//   }
 
-  return (
-    <div className="flex flex-col gap-4">
-      {postEntries?.map((entry, index) => (
-        <div key={index}>
-          <p>{entry.content}</p>
-          {entry.tag.map((obj, idx) => (<span key={idx} className="pr-2">{obj.desc}</span>))}
-        </div>
-      ))}
-    </div>
-  );
-};
+//   return (
+//     <div className="flex flex-col gap-4">
+//       {postEntries?.map((entry, index) => (
+//         <div key={index}>
+//           <p>{entry.content}</p>
+//           {entry.tag.map((obj, idx) => (<span key={idx} className="pr-2">{obj.desc}</span>))}
+//         </div>
+//       ))}
+//     </div>
+//   );
+// };
 
 const Home: NextPage = () => {
   const { data: session, status } = useSession();
@@ -174,17 +181,17 @@ const Home: NextPage = () => {
   }
 
   return (
-    <div className="flex flex-row justify-center bg-white mt-8 mx-10 p-10">
+    <div className="mx-10 mt-8 flex flex-row justify-center bg-white p-10">
       <Head>
         <title>post</title>
         <meta name="description" content="Generated by create-t3-app" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="flex flex-col items-center">
+      <div className="flex w-full flex-col items-center">
         <h1 className="pt-4 text-3xl">Create New Post</h1>
-        
-        <div className="pt-10">
+
+        <div className="w-full pt-10">
           <div>
             {session ? (
               <>
@@ -198,8 +205,8 @@ const Home: NextPage = () => {
                 >
                   Logout
                 </button>
-                <div className="pt-6">
-                  <Form />
+                <div className="w-full pt-6">
+                  <FormPost />
                 </div>
               </>
             ) : (
@@ -218,7 +225,7 @@ const Home: NextPage = () => {
             </div> */}
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 };

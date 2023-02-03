@@ -24,6 +24,7 @@ model Example {
 
 model Post {
   id         String   @id @unique @default(cuid())
+  title      String
   content    String?
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
